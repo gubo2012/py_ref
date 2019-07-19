@@ -7,6 +7,7 @@ Created on Wed Jul 17 16:12:54 2019
 
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# or use os.chdir('..')
 
 import docstring_example
 
