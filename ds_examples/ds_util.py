@@ -16,3 +16,8 @@ def show_unique_value(df, col):
     if n_unique <= 10:
         print(df[col].unique())
 
+
+def get_mape(y_act, y_fcst):
+    y_act, y_fcst = np.array(y_act), np.array(y_fcst)
+    mape = np.abs(y_act - y_fcst).sum() / y_act.sum()
+    return mape * 100
