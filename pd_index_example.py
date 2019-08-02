@@ -36,3 +36,6 @@ df_merged3 = pd.merge(df_ri, df3)
 df_merged4 = pd.merge(df_ri, df3, how = 'left')
 
 df_merged5 = pd.merge(df_ri, df3, how = 'right')
+
+
+df_filter = df_merged.loc[(df_merged.A > 0) & (df_merged.AA < 0), :].copy()
