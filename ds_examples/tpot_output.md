@@ -1,0 +1,21 @@
+Times: [64.73758185, 64.23066879, 79.63684502000001]
+Scores: [-0.2063083517510045, -0.2063083517510045, -0.2266015885902214]
+Winning pipelines: [Pipeline(memory=None,
+     steps=[('randomforestregressor', RandomForestRegressor(bootstrap=True, criterion='mse', max_depth=None,
+           max_features=0.35000000000000003, max_leaf_nodes=None,
+           min_impurity_decrease=0.0, min_impurity_split=None,
+           min_samples_leaf=13, min_samples_split=17,
+           min_weight_fraction_leaf=0.0, n_estimators=100, n_jobs=None,
+           oob_score=False, random_state=None, verbose=0, warm_start=False))]), Pipeline(memory=None,
+     steps=[('randomforestregressor', RandomForestRegressor(bootstrap=True, criterion='mse', max_depth=None,
+           max_features=0.35000000000000003, max_leaf_nodes=None,
+           min_impurity_decrease=0.0, min_impurity_split=None,
+           min_samples_leaf=13, min_samples_split=17,
+           min_weight_fraction_leaf=0.0, n_estimators=100, n_jobs=None,
+           oob_score=False, random_state=None, verbose=0, warm_start=False))]), Pipeline(memory=None,
+     steps=[('randomforestregressor', RandomForestRegressor(bootstrap=True, criterion='mse', max_depth=None,
+           max_features=0.25, max_leaf_nodes=None,
+           min_impurity_decrease=0.0, min_impurity_split=None,
+           min_samples_leaf=20, min_samples_split=17,
+           min_weight_fraction_leaf=0.0, n_estimators=100, n_jobs=None,
+           oob_score=False, random_state=None, verbose=0, warm_start=False))])]
