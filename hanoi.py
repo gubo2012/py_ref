@@ -16,7 +16,10 @@ def move(t_from, t_to, move_n):
         move(t_from, t_to, 1)
         move(t_other, t_to, move_n - 1)    
 
-n = 4
 
-move(0, 2, n)
+if __name__ == '__main__':
+
+    n = 4
+    
+    move(0, 2, n)
 
