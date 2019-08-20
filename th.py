@@ -7,6 +7,7 @@ Created on Mon Aug 19 18:53:31 2019
 
 import pandas as pd
 import numpy as np
+import numpy.testing as npt
 
 import matplotlib.pyplot as plt 
 import seaborn as sns
@@ -29,7 +30,9 @@ def draw_pf(outs, denom=47):
     
     #draw_1_only_01 = (denom - outs)/denom * (outs) / (denom -1)
     draw_1_only_01 = draw(outs, denom, False) * draw(outs, denom -1)
-    assert draw_1_only_10 == draw_1_only_01    
+#    print(outs)    
+#    assert draw_1_only_10 == draw_1_only_01    
+    npt.assert_almost_equal (draw_1_only_10, draw_1_only_01)
     
     draw_1_only = draw_1_only_10 + draw_1_only_01
     return draw_1_only, draw_2
@@ -41,6 +44,16 @@ def draw_pt(outs, denom=46):
 
 def break_even_prob(pot, r):
     return r/(pot + r * 2)
+
+
+def format_outs(outs):
+    d1, d2 = draw_pf(outs) 
+    dpt = draw_pt(outs)
+    return (outs, d1+d2, dpt)
+
+
+def be_prob_to_c(prob):
+    return prob/(1-2*prob)
 
 pot = 40
 
@@ -63,3 +76,9 @@ r2 = pot2 / 3
 ev2 = (pot2 + r2) * dt1 + (- r2) * (1-dt1)
 
 ev1 = (pot + r1) * draw(outs, denom) + (-r1) * (1-draw(outs, denom))
+
+
+list_outs = list(range(5, 16))
+list_pf = list(map(format_outs, list_outs))
+
+df = pd.DataFrame(list_pf, columns=['o', 'pf', 'pt'])
