@@ -15,7 +15,7 @@ import sys
 
 # UDF
 import stock_io
-import util
+import ta_util
 
 
 if __name__ == '__main__':
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         drop=True)
 
 
-    talib_moving_averages, functions = util.get_functions()
+    talib_moving_averages, functions = ta_util.get_functions()
 
 
     # Determine kurtosis "K" values for MA period 4-99
