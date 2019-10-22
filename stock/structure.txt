@@ -1,0 +1,20 @@
+structure:
+
+raw_inputs:
+ticker, benchmark, vix, comp_tickers, sentiment, other FA & Econs
+
+process_data:
+time series:
+	MA, MACD...
+	var(t-1)
+	or var(t-n)
+
+regression vs classification
+	>0 and <=0
+
+train:
+	1) static
+		xgm
+	2) with states
+		lstm
+
