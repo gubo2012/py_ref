@@ -3,13 +3,13 @@ import numpy as np
 from scipy.stats import kurtosis
 from pmdarima import auto_arima
 import pmdarima as pm
-from sklearn.metrics import mean_squared_error
-from sklearn.preprocessing import MinMaxScaler
-from keras.models import Sequential
-from keras.layers import Dense, LSTM
-from keras.callbacks import EarlyStopping
-from talib import abstract
-import json
+# from sklearn.metrics import mean_squared_error
+# from sklearn.preprocessing import MinMaxScaler
+# from keras.models import Sequential
+# from keras.layers import Dense, LSTM
+# from keras.callbacks import EarlyStopping
+# from talib import abstract
+# import json
 import sys
 
 # UDF 

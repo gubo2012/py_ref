@@ -20,7 +20,7 @@ import stock_io
 
 if __name__ == '__main__':
 
-    ticker = 'QQQ'
+    ticker = 'SPY'
 
     data = pd.read_csv(stock_io.format_data.format(ticker), header=0).tail(1500).reset_index(drop=True)
     
