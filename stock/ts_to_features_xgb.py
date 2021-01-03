@@ -13,40 +13,47 @@ import stock_io
 import ts_to_features
 
 # ML
-from xgboost import XGBClassifier
+from xgboost import XGBClassifier, plot_importance
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix, roc_auc_score
 
 def get_x_y(df):
     X = df.copy()
-    X = X.drop(['Date', 'target'], axis = 1)
+    X = X.drop(['date', 'target'], axis = 1)
     y = df['target']
     return X, y
  
 
 
-ticker = 'MSFT'
+ticker = 'SPY'
 up_down_threshold = 0.005 #0.5%
 n_day_fcst = 1
 total_shifts = 15
 
+use_yahoo_flag = 1
 
-df = pd.read_csv(stock_io.format_data.format(ticker))
+if use_yahoo_flag:
+    df = pd.read_csv(stock_io.raw_data.format(ticker))
+else:
+    df = pd.read_pickle(stock_io.pkl_data.format(ticker))
+    df.reset_index(level=0, inplace=True)
+
+df = ts_to_features.data_format(df)
 
 start_date = '2010-01-01'
 test_date = '2020-10-01'
-df = df[df.Date >= start_date]
+df = df[df.date >= start_date]
 
 
 
 # use adj close instead of close
-df = df.drop(['close'], axis=1)
-df = df.rename(columns = {'Adj Close':'close'})
+df = df.drop(['Close'], axis=1)
+df = df.rename(columns = {'Adj Close':'Close'})
 
-df = df.sort_values(by=['Date'])
+df = df.sort_values(by=['date'])
 
-shift_cols = ['Open', 'high', 'low', 'close', 'Volume']
+shift_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
 
 
 # single shift
@@ -56,11 +63,11 @@ shift_cols = ['Open', 'high', 'low', 'close', 'Volume']
 df = ts_to_features.add_multi_shifts(df, shift_cols, total_shifts)
 
 
-col_latest_close = 'close'+ '_lag{}'.format(n_day_fcst)
+col_latest_close = 'Close'+ '_lag{}'.format(n_day_fcst)
 df['target'] = 0
 
-df['target'] = np.where(df['close'] >= df[col_latest_close] * (1+up_down_threshold), 1, df['target'])
-df['target'] = np.where(df['close'] <= df[col_latest_close] * (1-up_down_threshold), -1, df['target']) 
+df['target'] = np.where(df['Close'] >= df[col_latest_close] * (1+up_down_threshold), 1, df['target'])
+df['target'] = np.where(df['Close'] <= df[col_latest_close] * (1-up_down_threshold), -1, df['target']) 
 
 #df.target.hist()
 
@@ -68,7 +75,7 @@ df['target'] = np.where(df['close'] <= df[col_latest_close] * (1-up_down_thresho
 df = ts_to_features.ts_normalize(df, shift_cols, total_shifts)
 
 # ML
-drop_list = ['Open', 'high', 'low', 'close', 'Volume']
+drop_list = ['Open', 'High', 'Low', 'Close', 'Volume']
 for col in shift_cols:
     drop_list.append(col + '_sum')
     drop_list.append(col + '_avg')
@@ -77,8 +84,8 @@ df = df.drop(drop_list, axis=1)
 
 
 # ML pipeline
-df_train = df[df.Date < test_date]
-df_test = df[df.Date >= test_date]
+df_train = df[df.date < test_date]
+df_test = df[df.date >= test_date]
 
 
 # ML train
@@ -108,3 +115,11 @@ for i in range(3):
     print('Actual', cm_labels[i], model_cm[i])
 y_test.hist()
 
+#print('feature importance', model.feature_importances_)
+#plot_importance(model)
+
+df_features =  pd.DataFrame(
+        {'feature': X_train.columns,
+         'importance': model.feature_importances_})
+df_features = df_features.sort_values(by=['importance'], ascending = False)
+    

@@ -5,6 +5,15 @@ Created on Fri Jan  1 13:03:51 2021
 @author: GuBo
 """
 
+
+def data_format(df):
+    if 'Date' in df.columns:
+        df = df.rename(columns = {'Date':'date'})
+    if 'symbol' in df.columns:
+        df = df.drop(['symbol'], axis=1)
+    return df
+
+
 def add_shift_cols(df, cols, shift, sum_flag = False):
     for col in cols:
         col_shift = col + '_lag{}'.format(shift)
