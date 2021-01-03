@@ -26,12 +26,14 @@ def get_x_y(df):
  
 
 
-ticker = 'SPY'
+ticker = 'QQQ'
 up_down_threshold = 0.005 #0.5%
 n_day_fcst = 1
 total_shifts = 15
 
-use_yahoo_flag = 1
+use_yahoo_flag = 0
+
+use_pc_flag = 1
 
 if use_yahoo_flag:
     df = pd.read_csv(stock_io.raw_data.format(ticker))
@@ -48,8 +50,9 @@ df = df[df.date >= start_date]
 
 
 # use adj close instead of close
-df = df.drop(['Close'], axis=1)
-df = df.rename(columns = {'Adj Close':'Close'})
+#df = df.drop(['Close'], axis=1)
+#df = df.rename(columns = {'Adj Close':'Close'})
+df = df.drop(['Adj Close'], axis=1)
 
 df = df.sort_values(by=['date'])
 
@@ -69,6 +72,7 @@ df['target'] = 0
 df['target'] = np.where(df['Close'] >= df[col_latest_close] * (1+up_down_threshold), 1, df['target'])
 df['target'] = np.where(df['Close'] <= df[col_latest_close] * (1-up_down_threshold), -1, df['target']) 
 
+df_copy = df.copy()
 #df.target.hist()
 
 
@@ -81,6 +85,9 @@ for col in shift_cols:
     drop_list.append(col + '_avg')
 
 df = df.drop(drop_list, axis=1)
+
+if use_pc_flag:
+    df = ts_to_features.add_pc_ratios(df)
 
 
 # ML pipeline
@@ -96,7 +103,8 @@ model = XGBClassifier()
 model.fit(X_train, y_train)
 
 print('Ticker: ', ticker)
-
+if use_pc_flag:
+    print('Use EquityPC & ETPPC')
 
 # ML score
 y_pred = model.predict(X_train)
