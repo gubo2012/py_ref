@@ -26,7 +26,7 @@ def get_x_y(df):
  
 
 
-ticker = 'QQQ'
+ticker = 'SPY'
 up_down_threshold = 0.005 #0.5%
 n_day_fcst = 1
 total_shifts = 15
@@ -39,7 +39,7 @@ if use_yahoo_flag:
     df = pd.read_csv(stock_io.raw_data.format(ticker))
 else:
     df = pd.read_pickle(stock_io.pkl_data.format(ticker))
-    df.reset_index(level=0, inplace=True)
+    df = ts_to_features.mongodb_format(df)
 
 df = ts_to_features.data_format(df)
 
@@ -58,6 +58,16 @@ df = df.sort_values(by=['date'])
 
 shift_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
 
+
+# add fake-date for forecasting
+
+#df_fake = df.copy()
+#df_fake = df_fake.tail(1)
+#df_fake.set_value(df_fake.index[-1], 'date', ts_to_features.fake_date)
+#
+#df = df.append(df_fake)
+
+df = ts_to_features.clone_last_row(df)
 
 # single shift
 #df = ts_to_features.add_shift_cols(df, shift_cols, 1)
@@ -112,6 +122,12 @@ accuracy = accuracy_score(y_train, y_pred)
 print("In-Sample Accuracy: %.2f%%" % (accuracy * 100.0))
 
 y_pred = model.predict(X_test)
+next_date_fcst = y_pred[-1]
+
+# remove the last row, fake_date, for accuracy cal
+y_test = y_test[:-1]
+y_pred = y_pred[:-1]
+
 accuracy = accuracy_score(y_test, y_pred)
 print("Out-of-Sample Accuracy: %.2f%%" % (accuracy * 100.0))
 
@@ -120,7 +136,7 @@ cm_labels = [-1, 0, 1]
 model_cm = confusion_matrix(y_test, y_pred, labels=cm_labels)
 print('predicted = ', cm_labels)
 for i in range(3):
-    print('Actual', cm_labels[i], model_cm[i])
+    print('Actual', cm_labels[i], model_cm[i], 'Sum', sum(model_cm[i]))
 y_test.hist()
 
 #print('feature importance', model.feature_importances_)
@@ -131,3 +147,5 @@ df_features =  pd.DataFrame(
          'importance': model.feature_importances_})
 df_features = df_features.sort_values(by=['importance'], ascending = False)
     
+
+print('*** Next date forecast: ', next_date_fcst)
