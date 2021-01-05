@@ -5,9 +5,11 @@ Created on Fri Jan  1 12:58:04 2021
 @author: GuBo
 """
 
+
 import pandas as pd
 import numpy as np
-#import seaborn as sns
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 import stock_io
 import ts_to_features
@@ -26,7 +28,7 @@ def get_x_y(df):
  
 
 
-ticker = 'SPY'
+ticker = 'QQQ'
 up_down_threshold = 0.005 #0.5%
 n_day_fcst = 1
 total_shifts = 15
@@ -47,7 +49,8 @@ start_date = '2010-01-01'
 test_date = '2020-10-01'
 df = df[df.date >= start_date]
 
-
+df_close = df.copy()
+df_close = df_close[['date', 'Close']]
 
 # use adj close instead of close
 #df = df.drop(['Close'], axis=1)
@@ -149,3 +152,15 @@ df_features = df_features.sort_values(by=['importance'], ascending = False)
     
 
 print('*** Next date forecast: ', next_date_fcst)
+
+df_plot = pd.DataFrame({'date':df_test['date'][:-1], 'y_act':y_test, 'y_fcst':y_pred})
+df_plot = pd.merge(df_plot, df_close, on = 'date', how='left')
+df_plot['date'] = df_plot['date'].apply(lambda x:x[2:])
+df_plot.set_index('date', inplace=True, drop=True)
+
+#%matplotlib qt
+sns.lineplot(data=df_plot['Close'], color = 'g')
+ax2 = plt.twinx()
+sns.lineplot(data=df_plot[['y_act', 'y_fcst']], ax=ax2)
+#for tl in ax2.get_xticklabels():
+#    tl.set_rotation(30)
