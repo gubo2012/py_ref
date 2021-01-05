@@ -40,17 +40,19 @@ def ts_normalize(df, cols, shifts):
     return df
 
 
-def add_multi_shifts(df, cols, shifts):
-    for col in cols:
-        col_sum = col + '_sum'
-        df[col_sum] = 0
+def add_multi_shifts(df, cols, shifts, sum_flag=True):
+    if sum_flag:
+        for col in cols:
+            col_sum = col + '_sum'
+            df[col_sum] = 0
     
     for shift in range(shifts):
-        df = add_shift_cols(df, cols, shift+1, sum_flag = True)
+        df = add_shift_cols(df, cols, shift+1, sum_flag)
     
-    for col in cols:
-        col_avg = col + '_avg'
-        df[col_avg] = df[col + '_sum'] / shifts
+    if sum_flag:
+        for col in cols:
+            col_avg = col + '_avg'
+            df[col_avg] = df[col + '_sum'] / shifts
         
     # remove all NA
     df = df[df[cols[0] + '_lag{}'.format(shifts)] == df[cols[0] + '_lag{}'.format(shifts)]]

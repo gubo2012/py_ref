@@ -28,7 +28,7 @@ def get_x_y(df):
  
 
 
-ticker = 'SPY'
+ticker = 'QQQ'
 up_down_threshold = 0.005 #0.5%
 n_day_fcst = 1
 total_shifts = 15
@@ -61,6 +61,10 @@ df = df.sort_values(by=['date'])
 
 shift_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
 
+df['CO_HL'] = (df['Close'] - df['Open']) / (df['High'] - df['Low'])
+df['HC_HL'] = (df['High'] - df['Close']) / (df['High'] - df['Low'])
+
+shift_only_cols = ['CO_HL', 'HC_HL']
 
 # add fake-date for forecasting
 
@@ -77,6 +81,7 @@ df = ts_to_features.clone_last_row(df)
 
 # multi shifts
 df = ts_to_features.add_multi_shifts(df, shift_cols, total_shifts)
+df = ts_to_features.add_multi_shifts(df, shift_only_cols, total_shifts, sum_flag = False)
 
 
 col_latest_close = 'Close'+ '_lag{}'.format(n_day_fcst)
@@ -92,7 +97,7 @@ df_copy = df.copy()
 df = ts_to_features.ts_normalize(df, shift_cols, total_shifts)
 
 # ML
-drop_list = ['Open', 'High', 'Low', 'Close', 'Volume']
+drop_list = ['Open', 'High', 'Low', 'Close', 'Volume', 'CO_HL', 'HC_HL']
 for col in shift_cols:
     drop_list.append(col + '_sum')
     drop_list.append(col + '_avg')
@@ -116,9 +121,7 @@ X_test, y_test = get_x_y(df_test)
 X_train_train, X_train_test, y_train_train, y_train_test = train_test_split(X_train, y_train, test_size=0.20, random_state=7)
 
 model = XGBClassifier()
-eval_set = [(X_train_test, y_train_test)]
-#model.fit(X_train_train, y_train_train, eval_metric='auc', eval_set=eval_set, verbose=True)
-model.fit(X_train_train, y_train_train, eval_metric='auc')
+model.fit(X_train_train, y_train_train, eval_metric='mlogloss', eval_set=[(X_train_test, y_train_test)], early_stopping_rounds=25, verbose=True)
 
 
 print('Ticker: ', ticker)
