@@ -28,7 +28,7 @@ def add_shift_cols(df, cols, shift, sum_flag = False):
         df[col_shift] = df[col].shift(shift)
         
         if sum_flag:
-            df[col + '_sum'] += df[col_shift]
+            df[col + '_sum'] = df[col + '_sum'] + df[col_shift]
     return df
 
 
@@ -82,6 +82,9 @@ def add_pc_ratios(df, shifts = 5):
     
     for shift in range(shifts):
         df_merge = add_shift_cols(df_merge, ['EquityPC', 'ETPPC'], shift+1)
+    
+    # remove all NA
+    df_merge = df_merge[df_merge['EquityPC' + '_lag{}'.format(shifts)] == df_merge['EquityPC' + '_lag{}'.format(shifts)]]
         
     df_merge = df_merge.drop(['EquityPC', 'ETPPC'], axis=1)
     

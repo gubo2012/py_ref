@@ -28,7 +28,7 @@ def get_x_y(df):
  
 
 
-ticker = 'QQQ'
+ticker = 'SPY'
 up_down_threshold = 0.005 #0.5%
 n_day_fcst = 1
 total_shifts = 15
@@ -46,7 +46,7 @@ else:
 df = ts_to_features.data_format(df)
 
 start_date = '2010-01-01'
-test_date = '2020-10-01'
+test_date = '2020-08-01'
 df = df[df.date >= start_date]
 
 df_close = df.copy()
@@ -112,8 +112,14 @@ df_test = df[df.date >= test_date]
 X_train, y_train = get_x_y(df_train)
 X_test, y_test = get_x_y(df_test)
 
+
+X_train_train, X_train_test, y_train_train, y_train_test = train_test_split(X_train, y_train, test_size=0.20, random_state=7)
+
 model = XGBClassifier()
-model.fit(X_train, y_train)
+eval_set = [(X_train_test, y_train_test)]
+#model.fit(X_train_train, y_train_train, eval_metric='auc', eval_set=eval_set, verbose=True)
+model.fit(X_train_train, y_train_train, eval_metric='auc')
+
 
 print('Ticker: ', ticker)
 if use_pc_flag:
