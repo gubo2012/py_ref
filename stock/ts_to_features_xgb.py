@@ -29,13 +29,14 @@ def get_x_y(df):
 
 
 ticker = 'QQQ'
-up_down_threshold = 0.005 #0.5%
+up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
 total_shifts = 15
 
 use_yahoo_flag = 0
 
 use_pc_flag = 1
+use_other_tickers = 1
 
 if use_yahoo_flag:
     df = pd.read_csv(stock_io.raw_data.format(ticker))
@@ -45,7 +46,7 @@ else:
 
 df = ts_to_features.data_format(df)
 
-start_date = '2010-01-01'
+start_date = '2015-01-01'
 test_date = '2020-08-01'
 df = df[df.date >= start_date]
 
@@ -107,6 +108,8 @@ df = df.drop(drop_list, axis=1)
 if use_pc_flag:
     df = ts_to_features.add_pc_ratios(df)
 
+if use_other_tickers:
+    df = ts_to_features.add_other_tickers(df)
 
 # ML pipeline
 df_train = df[df.date < test_date]
