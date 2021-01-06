@@ -46,7 +46,7 @@ else:
 
 df = ts_to_features.data_format(df)
 
-start_date = '2015-01-01'
+start_date = '2019-01-01'
 test_date = '2020-08-01'
 df = df[df.date >= start_date]
 
@@ -128,8 +128,9 @@ model.fit(X_train_train, y_train_train, eval_metric='mlogloss', eval_set=[(X_tra
 
 
 print('Ticker: ', ticker)
-if use_pc_flag:
-    print('Use EquityPC & ETPPC')
+#if use_pc_flag:
+#    print('Use EquityPC & ETPPC')
+print('Training Set: {} to {}'.format(df_train['date'].min(), df_train['date'].max()))
 
 # ML score
 y_pred = model.predict(X_train)
