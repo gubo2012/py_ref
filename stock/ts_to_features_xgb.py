@@ -37,6 +37,7 @@ use_yahoo_flag = 0
 
 use_pc_flag = 1
 use_other_tickers = 1
+use_btc_flag = 1
 
 if use_yahoo_flag:
     df = pd.read_csv(stock_io.raw_data.format(ticker))
@@ -110,6 +111,9 @@ if use_pc_flag:
 
 if use_other_tickers:
     df = ts_to_features.add_other_tickers(df)
+
+if use_btc_flag:
+    df = ts_to_features.add_btc(df)
 
 # ML pipeline
 df_train = df[df.date < test_date]

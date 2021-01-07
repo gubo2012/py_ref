@@ -136,3 +136,28 @@ def add_other_tickers(df, shifts = 15):
     df_merge = df_merge.drop(ticker_list, axis=1)
     
     return df_merge
+
+
+def add_btc(df, shifts = 2):
+    
+    df_btc = pd.read_pickle('btc.pkl')
+    
+    df_btc = df_btc[['date', 'price', 'volume_24h']]
+    df_btc = df_btc.rename(columns = {'price':'BTC', 'volume_24h':'BTC_vol'})
+    df_btc = mongodb_format(df_btc)
+    df_btc = clone_last_row(df_btc)
+    
+    
+    # merge
+    df_merge = pd.merge(df, df_btc, how = 'inner', on = 'date')
+    
+    for shift in range(shifts):
+        df_merge = add_shift_cols(df_merge, ['BTC', 'BTC_vol'], shift+1, scaler_flag = True)
+    
+    # remove all NA    
+#    df_merge = df_merge[df_merge['EquityPC' + '_lag{}'.format(shifts)] == df_merge['EquityPC' + '_lag{}'.format(shifts)]]
+    df_merge = remove_na(df_merge, 'BTC' + '_lag{}'.format(shifts))
+        
+    df_merge = df_merge.drop(['BTC', 'BTC_vol'], axis=1)
+    
+    return df_merge
