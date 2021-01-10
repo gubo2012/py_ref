@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 import stock_io
 import ts_to_features
+import ta_util
 
 # ML
 from xgboost import XGBClassifier, plot_importance
@@ -28,7 +29,7 @@ def get_x_y(df):
  
 
 
-ticker = 'QQQ'
+ticker = 'SPY'
 up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
 total_shifts = 15
@@ -38,6 +39,9 @@ use_yahoo_flag = 0
 use_pc_flag = 1
 use_other_tickers = 1
 use_btc_flag = 1
+use_cdl_patt = 1
+patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CDLHARAMI', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLLONGLEGGEDDOJI', 'CDLMARUBOZU', 'CDLRICKSHAWMAN', 'CDLSHORTLINE']
+
 
 if use_yahoo_flag:
     df = pd.read_csv(stock_io.raw_data.format(ticker))
@@ -114,6 +118,12 @@ if use_other_tickers:
 
 if use_btc_flag:
     df = ts_to_features.add_btc(df)
+    
+if use_cdl_patt:
+    df = ta_util.add_cdl(df, patt_list, lag_flag = True)
+    
+
+
 
 # ML pipeline
 df_train = df[df.date < test_date]

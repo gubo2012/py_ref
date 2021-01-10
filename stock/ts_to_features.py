@@ -161,3 +161,6 @@ def add_btc(df, shifts = 2):
     df_merge = df_merge.drop(['BTC', 'BTC_vol'], axis=1)
     
     return df_merge
+
+
+    
