@@ -27,4 +27,7 @@ def add_cdl(df, patt_list, lag_flag = False, lag=1):
     return df
         
 
-        
+def add_ma(df, col, ma = 10):
+    col_ma = col + '_ma{}'.format(ma)
+    df[col_ma] = talib.MA(df[col].values, timeperiod=ma)
+    return df

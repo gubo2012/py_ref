@@ -13,7 +13,6 @@ import ta_util
 
 fake_date = '2029-12-0{}'
 clone_days = 2
-lags = '_lag{}d'
 
 def data_format(df):
     if 'Date' in df.columns:
@@ -44,12 +43,6 @@ def add_shift_cols(df, cols, shift, sum_flag = False, scaler_flag = False):
     return df
 
 
-def add_ratio(df, cols, col_denom):
-    for col in cols:
-        df[col] = df[col] / df[col_denom]
-    return df
-
-
 def ts_normalize(df, cols, shifts):
     for shift in range(shifts):
         for col in cols:
@@ -63,14 +56,14 @@ def remove_na(df, col):
     return df
     
 
-def add_multi_shifts(df, cols, shifts, sum_flag=False):
+def add_multi_shifts(df, cols, shifts, sum_flag=True):
     if sum_flag:
         for col in cols:
             col_sum = col + '_sum'
             df[col_sum] = 0
     
-    for shift in range(shifts+1):
-        df = add_shift_cols(df, cols, shift, sum_flag)
+    for shift in range(shifts):
+        df = add_shift_cols(df, cols, shift+1, sum_flag)
     
     if sum_flag:
         for col in cols:
@@ -118,26 +111,13 @@ def add_pc_ratios(df, shifts = 5):
     return df_merge
 
 
-def clone_last_row(df, shift_cols, days = clone_days):
+def clone_last_row(df, days = clone_days):
     df_fake = df.copy()
     df_fake = df_fake.tail(1)
     
-    # append rows
     for i in range(days):
-#        df_fake.set_value(df_fake.index[-1], 'date', fake_date.format(i+1))
-        df_fake.at[df_fake.index[-1], 'date'] = fake_date.format(i+1)
+        df_fake.set_value(df_fake.index[-1], 'date', fake_date.format(i+1))
         df = df.append(df_fake)
-    df = df.reset_index(drop=True)
-    
-    # shift col values
-    col_list = df.columns
-    for i in range(days):
-        row_idx = - days + i
-        for col in shift_cols:
-            j = 1
-            while col + lags.format(j) in col_list:
-                df.at[df.index[row_idx], col+lags.format(j)] = df.at[df.index[row_idx-1], col+lags.format(j-1)]                
-                j+=1    
     return df
 
 
