@@ -14,22 +14,11 @@ import matplotlib.pyplot as plt
 import stock_io
 import ts_to_features
 import ta_util
-
-# ML
-from xgboost import XGBClassifier, plot_importance
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix, roc_auc_score
-
-def get_x_y(df):
-    X = df.copy()
-    X = X.drop(['date', 'target'], axis = 1)
-    y = df['target']
-    return X, y
- 
+import util
+import stock_ml
 
 
-ticker = 'SPY'
+ticker = 'QQQ'
 up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
 total_shifts = 15
@@ -38,7 +27,7 @@ use_yahoo_flag = 0
 
 use_pc_flag = 1
 use_other_tickers = 1
-use_btc_flag = 1
+use_btc_flag = 0
 use_cdl_patt = 1
 patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CDLHARAMI', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLLONGLEGGEDDOJI', 'CDLMARUBOZU', 'CDLRICKSHAWMAN', 'CDLSHORTLINE']
 
@@ -90,7 +79,7 @@ df = ts_to_features.add_multi_shifts(df, shift_cols, total_shifts)
 df = ts_to_features.add_multi_shifts(df, shift_only_cols, total_shifts, sum_flag = False)
 
 
-col_latest_close = 'Close'+ '_lag{}'.format(n_day_fcst)
+col_latest_close = 'Close'+ '_lag{}d'.format(n_day_fcst)
 df['target'] = 0
 
 df['target'] = np.where(df['Close'] >= df[col_latest_close] * (1+up_down_threshold), 1, df['target'])
@@ -119,75 +108,39 @@ if use_other_tickers:
 if use_btc_flag:
     df = ts_to_features.add_btc(df)
     
-if use_cdl_patt:
-    df = ta_util.add_cdl(df, patt_list, lag_flag = True)
-    
-
-
-
-# ML pipeline
-df_train = df[df.date < test_date]
-df_test = df[df.date >= test_date]
-
-
-# ML train
-X_train, y_train = get_x_y(df_train)
-X_test, y_test = get_x_y(df_test)
-
-
-X_train_train, X_train_test, y_train_train, y_train_test = train_test_split(X_train, y_train, test_size=0.20, random_state=7)
-
-model = XGBClassifier()
-model.fit(X_train_train, y_train_train, eval_metric='mlogloss', eval_set=[(X_train_test, y_train_test)], early_stopping_rounds=25, verbose=True)
-
 
 print('Ticker: ', ticker)
-#if use_pc_flag:
-#    print('Use EquityPC & ETPPC')
-print('Training Set: {} to {}'.format(df_train['date'].min(), df_train['date'].max()))
 
-# ML score
-y_pred = model.predict(X_train)
-accuracy = accuracy_score(y_train, y_pred)
-print("In-Sample Accuracy: %.2f%%" % (accuracy * 100.0))
-
-y_pred = model.predict(X_test)
-next_date_fcst = y_pred[-1]
-
-# remove the last row, fake_date, for accuracy cal
-y_test = y_test[:-1]
-y_pred = y_pred[:-1]
-
-accuracy = accuracy_score(y_test, y_pred)
-print("Out-of-Sample Accuracy: %.2f%%" % (accuracy * 100.0))
-
-# confusion matrix
-cm_labels = [-1, 0, 1]
-model_cm = confusion_matrix(y_test, y_pred, labels=cm_labels)
-print('predicted = ', cm_labels)
-for i in range(3):
-    print('Actual', cm_labels[i], model_cm[i], 'Sum', sum(model_cm[i]))
-y_test.hist()
-
-#print('feature importance', model.feature_importances_)
-#plot_importance(model)
-
-df_features =  pd.DataFrame(
-        {'feature': X_train.columns,
-         'importance': model.feature_importances_})
-df_features = df_features.sort_values(by=['importance'], ascending = False)
+# 1-day fcst
+print('1-day Forecast:')
+if use_cdl_patt:
+    df = ta_util.add_cdl(df, patt_list, lag_flag = True, lag = 1)
     
+df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df, test_date)
+print(df_features.head(10))
+df_1d = df.copy()
 
-print('*** Next date forecast: ', next_date_fcst)
+# 2-day fcst
+print('2-day Forecast:')
+cols_lag1d = util.show_cols(df, 'lag1d')
+df = df.drop(cols_lag1d, axis=1)
+if use_cdl_patt:
+    df = ta_util.add_cdl(df, patt_list, lag_flag = True, lag = 2)
+    
+df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df, test_date)
+print(df_features.head(10))
 
-df_plot = pd.DataFrame({'date':df_test['date'][:-1], 'y_act':y_test, 'y_fcst':y_pred})
-df_plot = pd.merge(df_plot, df_close, on = 'date', how='left')
-df_plot['date'] = df_plot['date'].apply(lambda x:x[2:])
-df_plot.set_index('date', inplace=True, drop=True)
+#
+#df_plot = pd.DataFrame({'date':df_test['date'][:-1], 'y_act':y_test, 'y_fcst':y_pred})
+#df_plot = pd.merge(df_plot, df_close, on = 'date', how='left')
+#df_plot['date'] = df_plot['date'].apply(lambda x:x[2:])
+#df_plot.set_index('date', inplace=True, drop=True)
+#
+##%matplotlib qt
+#sns.lineplot(data=df_plot['Close'], color = 'g')
+#ax2 = plt.twinx()
+#sns.lineplot(data=df_plot[['y_act', 'y_fcst']], ax=ax2)
+##for tl in ax2.get_xticklabels():
+##    tl.set_rotation(30)
 
-#%matplotlib qt
-sns.lineplot(data=df_plot['Close'], color = 'g')
-ax2 = plt.twinx()
-sns.lineplot(data=df_plot[['y_act', 'y_fcst']], ax=ax2)
-#for tl in ax2.get_xticklabels():
-#    tl.set_rotation(30)
+

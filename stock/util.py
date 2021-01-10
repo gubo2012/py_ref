@@ -54,3 +54,6 @@ def print_results(accuracy_act, accuracy_pred,
           '\nMAPE:\t', mape)
 
     
+def show_cols(df, str_in):
+    col_list = [col for col in df.columns if str_in in col]
+    return col_list

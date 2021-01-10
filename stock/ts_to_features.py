@@ -26,7 +26,7 @@ def mongodb_format(df):
 
 def add_shift_cols(df, cols, shift, sum_flag = False, scaler_flag = False):
     for col in cols:
-        col_shift = col + '_lag{}'.format(shift)
+        col_shift = col + '_lag{}d'.format(shift)
         df[col_shift] = df[col].shift(shift)
         
         if sum_flag:
@@ -42,7 +42,7 @@ def add_shift_cols(df, cols, shift, sum_flag = False, scaler_flag = False):
 def ts_normalize(df, cols, shifts):
     for shift in range(shifts):
         for col in cols:
-            col_shift = col + '_lag{}'.format(shift+1)
+            col_shift = col + '_lag{}d'.format(shift+1)
             df[col_shift] = df[col_shift] / df[col + '_avg']
     return df
 
@@ -67,8 +67,8 @@ def add_multi_shifts(df, cols, shifts, sum_flag=True):
             df[col_avg] = df[col + '_sum'] / shifts
         
     # remove all NA
-#    df = df[df[cols[0] + '_lag{}'.format(shifts)] == df[cols[0] + '_lag{}'.format(shifts)]]
-    df = remove_na(df, cols[0] + '_lag{}'.format(shifts))
+#    df = df[df[cols[0] + '_lag{}d'.format(shifts)] == df[cols[0] + '_lag{}d'.format(shifts)]]
+    df = remove_na(df, cols[0] + '_lag{}d'.format(shifts))
     
     return df
 
@@ -99,8 +99,8 @@ def add_pc_ratios(df, shifts = 5):
         df_merge = add_shift_cols(df_merge, ['EquityPC', 'ETPPC'], shift+1)
     
     # remove all NA    
-#    df_merge = df_merge[df_merge['EquityPC' + '_lag{}'.format(shifts)] == df_merge['EquityPC' + '_lag{}'.format(shifts)]]
-    df_merge = remove_na(df_merge, 'EquityPC' + '_lag{}'.format(shifts))
+#    df_merge = df_merge[df_merge['EquityPC' + '_lag{}d'.format(shifts)] == df_merge['EquityPC' + '_lag{}d'.format(shifts)]]
+    df_merge = remove_na(df_merge, 'EquityPC' + '_lag{}d'.format(shifts))
         
     df_merge = df_merge.drop(['EquityPC', 'ETPPC'], axis=1)
     
@@ -131,7 +131,7 @@ def add_other_tickers(df, shifts = 15):
         df_merge = add_shift_cols(df_merge, ticker_list, shift+1, scaler_flag = True)
     
     # remove all NA    
-    df_merge = remove_na(df_merge, ticker_list[0] + '_lag{}'.format(shifts))
+    df_merge = remove_na(df_merge, ticker_list[0] + '_lag{}d'.format(shifts))
         
     df_merge = df_merge.drop(ticker_list, axis=1)
     
@@ -155,8 +155,8 @@ def add_btc(df, shifts = 2):
         df_merge = add_shift_cols(df_merge, ['BTC', 'BTC_vol'], shift+1, scaler_flag = True)
     
     # remove all NA    
-#    df_merge = df_merge[df_merge['EquityPC' + '_lag{}'.format(shifts)] == df_merge['EquityPC' + '_lag{}'.format(shifts)]]
-    df_merge = remove_na(df_merge, 'BTC' + '_lag{}'.format(shifts))
+#    df_merge = df_merge[df_merge['EquityPC' + '_lag{}d'.format(shifts)] == df_merge['EquityPC' + '_lag{}d'.format(shifts)]]
+    df_merge = remove_na(df_merge, 'BTC' + '_lag{}d'.format(shifts))
         
     df_merge = df_merge.drop(['BTC', 'BTC_vol'], axis=1)
     

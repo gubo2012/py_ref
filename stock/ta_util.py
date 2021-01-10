@@ -14,12 +14,12 @@ def get_functions():
     return talib_moving_averages, functions
 
 
-def add_cdl(df, patt_list, lag_flag = False):
+def add_cdl(df, patt_list, lag_flag = False, lag=1):
     
     for cdl_patt in patt_list:
         c_func = eval('talib.' + cdl_patt)
         if lag_flag:
-            df[cdl_patt] = c_func(df['Open_lag1'].values, df['High_lag1'].values, df['Low_lag1'].values, df['Close_lag1'].values)
+            df[cdl_patt] = c_func(df['Open_lag{}d'.format(lag)].values, df['High_lag{}d'.format(lag)].values, df['Low_lag{}d'.format(lag)].values, df['Close_lag{}d'.format(lag)].values)
         else:
             df[cdl_patt] = c_func(df['Open'].values, df['High'].values, df['Low'].values, df['Close'].values)
         
