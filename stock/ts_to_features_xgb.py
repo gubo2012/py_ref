@@ -18,7 +18,7 @@ import util
 import stock_ml
 
 
-ticker = 'QQQ'
+ticker = 'SPY'
 up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
 total_shifts = 15
@@ -69,7 +69,7 @@ shift_only_cols = ['CO_HL', 'HC_HL']
 #
 #df = df.append(df_fake)
 
-df = ts_to_features.clone_last_row(df)
+df = ts_to_features.clone_last_row(df, days = 2)
 
 # single shift
 #df = ts_to_features.add_shift_cols(df, shift_cols, 1)
@@ -116,7 +116,7 @@ print('1-day Forecast:')
 if use_cdl_patt:
     df = ta_util.add_cdl(df, patt_list, lag_flag = True, lag = 1)
     
-df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df, test_date)
+df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df, test_date, 1, 2)
 print(df_features.head(10))
 df_1d = df.copy()
 
@@ -127,7 +127,7 @@ df = df.drop(cols_lag1d, axis=1)
 if use_cdl_patt:
     df = ta_util.add_cdl(df, patt_list, lag_flag = True, lag = 2)
     
-df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df, test_date)
+df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df, test_date, 2, 2)
 print(df_features.head(10))
 
 #

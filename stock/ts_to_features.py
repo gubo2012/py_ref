@@ -9,7 +9,8 @@ import pandas as pd
 
 from sklearn.preprocessing import StandardScaler
 
-fake_date = '2029-12-31'
+fake_date = '2029-12-0{}'
+clone_days = 2
 
 def data_format(df):
     if 'Date' in df.columns:
@@ -82,7 +83,7 @@ def add_pc_ratios(df, shifts = 5):
     df_equity_pc = df_equity_pc[['date', 'PCRatio']]
     df_equity_pc = df_equity_pc.rename(columns = {'PCRatio':'EquityPC'})
     df_equity_pc = mongodb_format(df_equity_pc)
-    df_equity_pc = clone_last_row(df_equity_pc)
+    df_equity_pc = clone_last_row(df_equity_pc, clone_days)
     
     
     df_etp_pc = df_etp_pc[['date', 'PCRatio']]
@@ -107,12 +108,13 @@ def add_pc_ratios(df, shifts = 5):
     return df_merge
 
 
-def clone_last_row(df):
+def clone_last_row(df, days = clone_days):
     df_fake = df.copy()
     df_fake = df_fake.tail(1)
-    df_fake.set_value(df_fake.index[-1], 'date', fake_date)
     
-    df = df.append(df_fake)
+    for i in range(days):
+        df_fake.set_value(df_fake.index[-1], 'date', fake_date.format(i+1))
+        df = df.append(df_fake)
     return df
 
 

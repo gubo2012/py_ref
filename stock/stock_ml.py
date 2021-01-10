@@ -25,7 +25,7 @@ def get_x_y(df):
     return X, y
  
     
-def ml_pipeline(df, test_date):
+def ml_pipeline(df, test_date, fcst_day, fcst_day_total):
     # ML pipeline
     df_train = df[df.date < test_date]
     df_test = df[df.date >= test_date]
@@ -33,7 +33,7 @@ def ml_pipeline(df, test_date):
     
     model, X_train = ml_train(df_train)
     
-    next_date_fcst, y_test, y_pred = ml_score(df_test, model)
+    next_date_fcst, y_test, y_pred = ml_score(df_test, model, fcst_day, fcst_day_total)
     
     #print('feature importance', model.feature_importances_)
     #plot_importance(model)
@@ -70,15 +70,16 @@ def ml_train(df_train):
     return model, X_train
 
 
-def ml_score(df_test, ml_model):
+def ml_score(df_test, ml_model, fcst_day, fcst_day_total):
+    fcst_day_offset = fcst_day_total + 1 - fcst_day # up to 2-day fcst
     X_test, y_test = get_x_y(df_test)
     
     y_pred = ml_model.predict(X_test)
-    next_date_fcst = y_pred[-1]
+    next_date_fcst = y_pred[- fcst_day_offset]
 
     # remove the last row, fake_date, for accuracy cal
-    y_test = y_test[:-1]
-    y_pred = y_pred[:-1]
+    y_test = y_test[:- fcst_day_total]
+    y_pred = y_pred[:- fcst_day_total]
 
     accuracy = accuracy_score(y_test, y_pred)
     print("Out-of-Sample Accuracy: %.2f%%" % (accuracy * 100.0))
