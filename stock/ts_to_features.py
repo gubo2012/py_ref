@@ -25,7 +25,8 @@ def data_format(df):
 def mongodb_format(df):
 #    df.reset_index(level=0, inplace=True)
     df['date']=df['date'].astype(str)
-    df['Volume']=df['Volume'].astype(float)
+    if 'Volume' in df.columns:
+        df['Volume']=df['Volume'].astype(float)
     return df
 
 

@@ -16,12 +16,12 @@ import ts_to_features
 import ta_util
 import util
 import stock_ml
+import stock_fe
 
-
-ticker = 'SPY'
+ticker = 'QQQ'
 up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
-total_shifts = 3
+total_shifts = 10
 
 use_yahoo_flag = 0
 
@@ -127,12 +127,12 @@ df = df.drop(drop_list, axis=1)
 
 
 
-#
-#if use_pc_flag:
-#    df = ts_to_features.add_pc_ratios(df)
-#
-#if use_other_tickers:
-#    df = ts_to_features.add_other_tickers(df, ticker_list)
+
+if use_pc_flag:
+    df = stock_fe.add_pc_ratios(df)
+
+if use_other_tickers:
+    df = stock_fe.add_other_tickers(df, ticker_list)
 #
 #if use_btc_flag:
 #    df = ts_to_features.add_btc(df)
@@ -142,22 +142,23 @@ print('Ticker: ', ticker)
 
 # 1-day fcst
 print('1-day Forecast:')
-#if use_cdl_patt:
-#    df = ta_util.add_cdl(df, patt_list, lag_flag = True, lag = 1)
+if use_cdl_patt:
+    df_1d = stock_fe.add_cdl(df.copy(), df_cdl.copy(), patt_list, lag = 1)
     
-df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df, test_date, 1, 2)
+df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2)
 print(df_features.head(10))
-df_1d = df.copy()
 
 
 # 2-day fcst
 print('2-day Forecast:')
 cols_lag1d = util.show_cols(df, 'lag1d')
-df = df.drop(cols_lag1d, axis=1)
-#if use_cdl_patt:
-#    df = ta_util.add_cdl(df, patt_list, lag_flag = True, lag = 2)
+
+df_2d = df.copy()
+df_2d = df_2d.drop(cols_lag1d, axis=1)
+if use_cdl_patt:
+    df_2d = stock_fe.add_cdl(df_2d, df_cdl.copy(), patt_list, lag = 2)
     
-df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df, test_date, 2, 2)
+df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2)
 print(df_features.head(10))
 
 
