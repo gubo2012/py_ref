@@ -9,14 +9,19 @@ import pandas as pd
 
 import ts_to_features
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 start_date = '2018-01-01'
 
 shift_flag = True
 shifts = 15
 
+ticker = 'SLV'
+
 df_spy = pd.read_pickle('spy.pkl')
 df_qqq = pd.read_pickle('qqq.pkl')
-df_btc = pd.read_pickle('btc.pkl')
+df_ticker = pd.read_pickle('tickers.pkl')
 
 
 # ETF
@@ -28,13 +33,12 @@ df_qqq = df_qqq[['date', 'Close']]
 df_qqq = df_qqq.rename(columns = {'Close':'QQQ'})
 df_qqq = ts_to_features.mongodb_format(df_qqq)
 
-df_btc = df_btc[['date', 'price']]
-df_btc = df_btc.rename(columns = {'price':'BTC'})
-df_btc = ts_to_features.mongodb_format(df_btc)
+df_ticker = df_ticker[['date', ticker]]
+df_ticker = ts_to_features.mongodb_format(df_ticker)
 
 # merge
 df_merge = pd.merge(df_spy, df_qqq, how = 'inner', on = 'date')
-df_merge = pd.merge(df_merge, df_btc, how = 'inner', on = 'date')
+df_merge = pd.merge(df_merge, df_ticker, how = 'inner', on = 'date')
 
 
 # index to date
@@ -45,7 +49,7 @@ df = df_merge.copy()
 
 if shift_flag:
     for shift in range(shifts):
-        df = ts_to_features.add_shift_cols(df, ['BTC'], shift+1)
+        df = ts_to_features.add_shift_cols(df, [ticker], shift+1)
 
 
 df = df[df.date >= start_date]
@@ -60,6 +64,8 @@ df_corr = df.corr()
 
 print(df.corr())
 
+
 df_plot = df.copy()
-df_plot['BTC'] = df_plot['BTC'] / 100
-sns.lineplot(data=df_plot[['SPY', 'QQQ', 'BTC']])
+sns.lineplot(data=df_plot[['SPY', 'QQQ', ticker]])
+#for tl in ax2.get_xticklabels():
+#    tl.set_rotation(30)

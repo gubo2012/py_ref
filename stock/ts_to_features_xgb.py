@@ -27,6 +27,8 @@ use_yahoo_flag = 0
 
 use_pc_flag = 1
 use_other_tickers = 1
+#ticker_list = ['GLD', 'AGG']
+ticker_list = ['GLD', 'AGG', 'SLV']
 use_btc_flag = 0
 use_cdl_patt = 1
 patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CDLHARAMI', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLLONGLEGGEDDOJI', 'CDLMARUBOZU', 'CDLRICKSHAWMAN', 'CDLSHORTLINE']
@@ -103,7 +105,7 @@ if use_pc_flag:
     df = ts_to_features.add_pc_ratios(df)
 
 if use_other_tickers:
-    df = ts_to_features.add_other_tickers(df)
+    df = ts_to_features.add_other_tickers(df, ticker_list)
 
 if use_btc_flag:
     df = ts_to_features.add_btc(df)

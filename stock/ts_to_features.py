@@ -118,13 +118,14 @@ def clone_last_row(df, days = clone_days):
     return df
 
 
-def add_other_tickers(df, shifts = 15):
+def add_other_tickers(df, ticker_list = [], shifts = 15):
     
     df_tickers = pd.read_pickle('tickers.pkl')
     df_tickers = mongodb_format(df_tickers)
     df_tickers = clone_last_row(df_tickers)
 
-    ticker_list = [ticker for ticker in df_tickers.columns if ticker != 'date']
+    if len(ticker_list) == 0:
+        ticker_list = [ticker for ticker in df_tickers.columns if ticker != 'date']
     
     # merge
     df_merge = pd.merge(df, df_tickers, how = 'inner', on = 'date')
