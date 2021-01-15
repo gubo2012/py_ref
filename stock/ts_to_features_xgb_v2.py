@@ -19,7 +19,7 @@ import stock_ml
 import stock_fe
 import stock_bt
 
-ticker = 'SPY'
+ticker = 'QQQ'
 up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
 total_shifts = 10
@@ -112,6 +112,8 @@ df['target'] = 0
 df['target'] = np.where(df['Close_raw'] >= df['Close_raw_lag1d'] * (1+up_down_threshold), 1, df['target'])
 df['target'] = np.where(df['Close_raw'] <= df['Close_raw_lag1d'] * (1-up_down_threshold), -1, df['target']) 
 
+df['target_reg'] = df['Close_raw'] / df['Close_raw_lag1d'] - 1
+df = ts_to_features.remove_na(df, 'target_reg')
 
 # for ts debug's purpose
 #df_debug = df[['date', 'Close', 'Close_lag0d', 'Close_lag1d', 'Close_lag2d', 'Close_lag3d', 'Close_raw', 'Close_raw_lag1d', 'target']]
@@ -148,6 +150,8 @@ if use_cdl_patt:
     
 df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2)
 print(df_features.head(10))
+df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2, target = 'target_reg')
+print(df_features.head(10))
 
 
 # 2-day fcst
@@ -161,10 +165,13 @@ if use_cdl_patt:
     
 df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2)
 print(df_features.head(10))
+df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2, target = 'target_reg')
+print(df_features.head(10))
+
 
 
 # backtest
-df_bt = stock_bt.run_backtest(df_raw_copy, df_test, y_pred)
+#df_bt = stock_bt.run_backtest(df_raw_copy, df_test, y_pred)
         
     
             
