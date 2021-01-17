@@ -81,7 +81,7 @@ def ml_train(df_train, target):
         print("In-Sample Accuracy: %.2f%%" % (accuracy * 100.0))
     else:
         mse = mean_squared_error(y_train, y_pred)
-        print("In-Sample RMSE: {:.5f}".format(sqrt(mse)))
+        print("In-Sample RMSE: %.2f%%" % (sqrt(mse)*100))
     
     return model, X_train
 
@@ -113,7 +113,7 @@ def ml_score(df_test, ml_model, fcst_day, fcst_day_total, target):
     #    y_test.hist()
     else:
         mse = mean_squared_error(y_test, y_pred)
-        print("Out-of-Sample RMSE: {:.5f}".format(sqrt(mse)))
+        print("Out-of-Sample RMSE: %.2f%%" % (sqrt(mse)*100))
     
     return next_date_fcst, y_test, y_pred
 

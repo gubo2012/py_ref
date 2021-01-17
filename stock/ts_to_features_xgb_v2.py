@@ -19,7 +19,7 @@ import stock_ml
 import stock_fe
 import stock_bt
 
-ticker = 'QQQ'
+ticker = 'SPY'
 up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
 total_shifts = 10
@@ -29,7 +29,8 @@ use_yahoo_flag = 0
 use_pc_flag = 1
 use_other_tickers = 1
 #ticker_list = ['GLD', 'AGG']
-ticker_list = ['GLD', 'AGG', 'SLV']
+#ticker_list = ['GLD', 'AGG', 'SLV']
+ticker_list = ['GLD', 'SLV']
 use_btc_flag = 0
 use_cdl_patt = 1
 patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CDLHARAMI', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLLONGLEGGEDDOJI', 'CDLMARUBOZU', 'CDLRICKSHAWMAN', 'CDLSHORTLINE']
@@ -190,3 +191,11 @@ print(df_features.head(10))
 ###    tl.set_rotation(30)
 #
 #
+
+import mplfinance as mpf
+import datetime
+df_mpf = df_raw_copy.copy()
+#df_mpf.date = df_mpf.date.apply(datetime.datetime.fromtimestamp)
+df_mpf.date = df_mpf.date.apply(lambda x : datetime.datetime.strptime(x, '%Y-%m-%d'))
+df_mpf.set_index('date', inplace=True, drop=True)
+mpf.plot(df_mpf, type='candle', mav=(3,6,9), volume=True)
