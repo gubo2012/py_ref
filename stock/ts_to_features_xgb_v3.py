@@ -40,6 +40,8 @@ def run_grid_search(ticker, params):
     use_short_vol_flag = params['use_short_vol_flag']
 
     ticker_list = params['ticker_list']
+    if ticker in ticker_list:
+        ticker_list.remove(ticker)
     
     patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CDLHARAMI', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLLONGLEGGEDDOJI', 'CDLMARUBOZU', 'CDLRICKSHAWMAN', 'CDLSHORTLINE']
     
@@ -91,6 +93,8 @@ def run_grid_search(ticker, params):
     if use_cdl_patt:
         df_cdl = df_raw_copy.copy()
         df_cdl = ta_util.add_cdl(df_cdl, patt_list)
+    else:
+        df_cdl = pd.DataFrame({'empty' : []})
     
     
     # add MAs
@@ -177,8 +181,8 @@ def run_grid_search(ticker, params):
     output_dict = {'Ticker':ticker}
     for i in range(3):
         n = i+1
-        day_outout_dict = stock_ml.nth_day_fcst(df, df_cdl, n, patt_list, test_date,
-                                              print_features_flag=print_features_flag)
+        day_outout_dict = stock_ml.nth_day_fcst(df, df_cdl, n, patt_list, test_date, use_cdl_patt,
+                                                print_features_flag=print_features_flag)
         output_dict.update(day_outout_dict)
     
     print(output_dict)
@@ -187,7 +191,7 @@ def run_grid_search(ticker, params):
 
 if __name__ == '__main__':
     
-    ticker = 'SPY'
+    ticker = 'W'
     
     final_output = {}
     

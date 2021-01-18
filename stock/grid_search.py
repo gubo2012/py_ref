@@ -17,7 +17,7 @@ def add_key_value(params, n, search_dict, search_key_list):
         else:
             print(params)
             count = len(params_all)+1
-            params_all[count] = params
+            params_all[count] = params.copy()
 
 search_dict = {}
 
@@ -26,7 +26,7 @@ search_dict['use_other_tickers'] = [0, 1]
 search_dict['use_cdl_patt'] = [0, 1]
 search_dict['use_short_vol_flag'] = [0, 1]
 
-search_dict['ticker_list'] = [['GLD'], ['GLD', 'AGG'], ['GLD', 'SLV'], ['GLD', 'AGG', 'SLV']]
+search_dict['ticker_list'] = [['GLD'], ['GLD', 'AGG'], ['GLD', 'SLV'], ['GLD', 'AGG', 'SLV'], ['GLD', 'AGG', 'SLV', 'SPY', 'QQQ']]
 
 search_key_list = []
 for key, value in search_dict.items():

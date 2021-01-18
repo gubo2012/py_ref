@@ -125,9 +125,9 @@ def ml_score(df_test, ml_model, fcst_day, fcst_day_total, target,
     return next_date_fcst, y_test, y_pred, oos_benchmark
 
 
-def nth_day_fcst(df, df_cdl, n, patt_list, test_date,
+def nth_day_fcst(df, df_cdl, n, patt_list, test_date, use_cdl_patt,
                  n_total=3,
-                 use_cdl_patt = 1, print_features_flag = 0):
+                 print_features_flag = 0):
 
     print('')
     print('    {}-day Forecast:'.format(n))    
