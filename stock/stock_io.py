@@ -15,3 +15,6 @@ format_data = '{}_format.csv'
 file_pred_low = 'final_prediction_low_{}.csv'
 file_pred_high = 'final_prediction_high_{}.csv'
 
+grid_search = 'grid_search.json'
+
+grid_search_output = '{}_gs_output.pkl'
