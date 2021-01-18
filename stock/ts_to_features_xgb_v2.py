@@ -25,7 +25,7 @@ import warnings
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-ticker = 'QQQ'
+ticker = 'BYND'
 up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
 total_shifts = 10
@@ -36,7 +36,8 @@ use_pc_flag = 1
 use_other_tickers = 1
 #ticker_list = ['GLD', 'AGG']
 #ticker_list = ['GLD', 'AGG', 'SLV']
-ticker_list = ['GLD', 'SLV']
+#ticker_list = ['GLD', 'SLV']
+ticker_list = ['GLD']
 use_btc_flag = 0
 use_cdl_patt = 1
 use_short_vol_flag = 1
@@ -125,7 +126,7 @@ df = ts_to_features.add_multi_shifts(df, shift_cols, total_shifts)
 
 # add fake-date for forecasting
 
-df = ts_to_features.clone_last_row(df, shift_cols, days = 2)
+df = ts_to_features.clone_last_row(df, shift_cols, days = 3)
 
 
 # add target
@@ -170,34 +171,47 @@ print('Ticker: ', ticker)
 if use_short_vol_flag:
     print('Use short volume pct')
 
-# 1-day fcst
-print('1-day Forecast:')
-if use_cdl_patt:
-    df_1d = stock_fe.add_cdl(df.copy(), df_cdl.copy(), patt_list, lag = 1)
-    
-df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2)
-if print_features_flag:
-    print(df_features.head(10))
-df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2, target = 'target_reg')
-if print_features_flag:
-    print(df_features.head(10))
 
 
-# 2-day fcst
-print('2-day Forecast:')
-cols_lag1d = util.show_cols(df, 'lag1d')
+# 1 to 3 day fcst
+output_dict = {'Ticker':ticker}
+for i in range(3):
+    n = i+1
+    day_outout_dict = stock_ml.nth_day_fcst(df, df_cdl, n, patt_list, test_date,
+                                          print_features_flag=print_features_flag)
+    output_dict.update(day_outout_dict)
 
-df_2d = df.copy()
-df_2d = df_2d.drop(cols_lag1d, axis=1)
-if use_cdl_patt:
-    df_2d = stock_fe.add_cdl(df_2d, df_cdl.copy(), patt_list, lag = 2)
-    
-df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2)
-if print_features_flag:
-    print(df_features.head(10))
-df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2, target = 'target_reg')
-if print_features_flag:
-    print(df_features.head(10))
+print(output_dict)
+
+
+## 1-day fcst
+#print('1-day Forecast:')
+#if use_cdl_patt:
+#    df_1d = stock_fe.add_cdl(df.copy(), df_cdl.copy(), patt_list, lag = 1)
+#    
+#df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2)
+#if print_features_flag:
+#    print(df_features.head(10))
+#df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2, target = 'target_reg')
+#if print_features_flag:
+#    print(df_features.head(10))
+#
+#
+## 2-day fcst
+#print('2-day Forecast:')
+#cols_lag1d = util.show_cols(df, 'lag1d')
+#
+#df_2d = df.copy()
+#df_2d = df_2d.drop(cols_lag1d, axis=1)
+#if use_cdl_patt:
+#    df_2d = stock_fe.add_cdl(df_2d, df_cdl.copy(), patt_list, lag = 2)
+#    
+#df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2)
+#if print_features_flag:
+#    print(df_features.head(10))
+#df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2, target = 'target_reg')
+#if print_features_flag:
+#    print(df_features.head(10))
 
 
 
