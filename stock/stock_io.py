@@ -5,6 +5,7 @@ Created on Sat Oct 12 17:26:22 2019
 @author: GuBo
 """
 
+stocks_all_data = 'stocks_all.pkl'
 pkl_data = '{}.pkl'
 
 raw_data = '{}.csv'

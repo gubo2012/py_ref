@@ -19,12 +19,18 @@ import stock_ml
 import stock_fe
 import stock_bt
 
-ticker = 'SPY'
+import sys
+import warnings
+
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
+
+ticker = 'QQQ'
 up_down_threshold = 0.002 #0.2%
 n_day_fcst = 1
 total_shifts = 10
 
-use_yahoo_flag = 0
+use_stocks_all_data = 1
 
 use_pc_flag = 1
 use_other_tickers = 1
@@ -33,11 +39,15 @@ use_other_tickers = 1
 ticker_list = ['GLD', 'SLV']
 use_btc_flag = 0
 use_cdl_patt = 1
+use_short_vol_flag = 1
 patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CDLHARAMI', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLLONGLEGGEDDOJI', 'CDLMARUBOZU', 'CDLRICKSHAWMAN', 'CDLSHORTLINE']
 
+print_features_flag = 0
 
-if use_yahoo_flag:
-    df = pd.read_csv(stock_io.raw_data.format(ticker))
+if use_stocks_all_data:
+    df = pd.read_pickle(stock_io.stocks_all_data)
+    df = df[df['symbol'] == ticker]
+    df = ts_to_features.mongodb_format(df)
 else:
     df = pd.read_pickle(stock_io.pkl_data.format(ticker))
     df = ts_to_features.mongodb_format(df)
@@ -54,7 +64,12 @@ df_close = df_close[['date', 'Close']]
 # use adj close instead of close
 #df = df.drop(['Close'], axis=1)
 #df = df.rename(columns = {'Adj Close':'Close'})
-df = df.drop(['Adj Close'], axis=1)
+
+if use_short_vol_flag:
+    df = df.drop(['Adj Close', 'ShortVolume'], axis=1)
+else:
+    df = df.drop(['Adj Close', 'ShortVolume', 'short_vol_pct'], axis=1)
+
 
 df = df.sort_values(by=['date'])
 
@@ -79,13 +94,18 @@ if use_cdl_patt:
 
 # add MAs
 df = ts_to_features.add_mas(df, ['Close'])
-df = ts_to_features.add_mas(df, ['Volume'], [20])
+if use_short_vol_flag:
+    df = ts_to_features.add_mas(df, ['Volume', 'short_vol_pct'], [20])
+else:
+    df = ts_to_features.add_mas(df, ['Volume'], [20])
     
 
 # normalize
 df['Close_raw'] = df['Close']
 df = ts_to_features.add_ratio(df, ['Open', 'High', 'Low', 'Close', 'Close_ma10'], 'Close_ma20')
 df = ts_to_features.add_ratio(df, ['Volume'], 'Volume_ma20')
+if use_short_vol_flag:
+    df = ts_to_features.add_ratio(df, ['short_vol_pct'], 'short_vol_pct_ma20')
 
 
 #
@@ -94,6 +114,8 @@ df = ts_to_features.add_ratio(df, ['Volume'], 'Volume_ma20')
 
 # multi shifts
 shift_cols = ['Open', 'High', 'Low', 'Close', 'Volume', 'Close_ma10', 'CO_HL', 'HC_HL']
+if use_short_vol_flag:
+    shift_cols.append('short_vol_pct')
 df = ts_to_features.add_multi_shifts(df, shift_cols, total_shifts)
 
 
@@ -124,6 +146,8 @@ df = ts_to_features.remove_na(df, 'target_reg')
 drop_list = ['Open', 'High', 'Low', 'Close', 'Volume',
              'CO_HL', 'HC_HL', 'Close_ma10', 'Close_ma20', 'Volume_ma20',
              'Close_raw', 'Close_raw_lag1d']
+if use_short_vol_flag:
+    drop_list.extend(['short_vol_pct', 'short_vol_pct_ma20'])
 lag0d_list = util.show_cols(df, 'lag0d')
 drop_list += lag0d_list
 
@@ -143,6 +167,8 @@ if use_other_tickers:
 #    
 #
 print('Ticker: ', ticker)
+if use_short_vol_flag:
+    print('Use short volume pct')
 
 # 1-day fcst
 print('1-day Forecast:')
@@ -150,9 +176,11 @@ if use_cdl_patt:
     df_1d = stock_fe.add_cdl(df.copy(), df_cdl.copy(), patt_list, lag = 1)
     
 df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2)
-print(df_features.head(10))
+if print_features_flag:
+    print(df_features.head(10))
 df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_1d, test_date, 1, 2, target = 'target_reg')
-print(df_features.head(10))
+if print_features_flag:
+    print(df_features.head(10))
 
 
 # 2-day fcst
@@ -165,9 +193,11 @@ if use_cdl_patt:
     df_2d = stock_fe.add_cdl(df_2d, df_cdl.copy(), patt_list, lag = 2)
     
 df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2)
-print(df_features.head(10))
+if print_features_flag:
+    print(df_features.head(10))
 df_features, next_date_fcst, df_test, y_test, y_pred = stock_ml.ml_pipeline(df_2d, test_date, 2, 2, target = 'target_reg')
-print(df_features.head(10))
+if print_features_flag:
+    print(df_features.head(10))
 
 
 
@@ -192,10 +222,10 @@ print(df_features.head(10))
 #
 #
 
-import mplfinance as mpf
-import datetime
-df_mpf = df_raw_copy.copy()
-#df_mpf.date = df_mpf.date.apply(datetime.datetime.fromtimestamp)
-df_mpf.date = df_mpf.date.apply(lambda x : datetime.datetime.strptime(x, '%Y-%m-%d'))
-df_mpf.set_index('date', inplace=True, drop=True)
-mpf.plot(df_mpf, type='candle', mav=(3,6,9), volume=True)
+#import mplfinance as mpf
+#import datetime
+#df_mpf = df_raw_copy.copy()
+##df_mpf.date = df_mpf.date.apply(datetime.datetime.fromtimestamp)
+#df_mpf.date = df_mpf.date.apply(lambda x : datetime.datetime.strptime(x, '%Y-%m-%d'))
+#df_mpf.set_index('date', inplace=True, drop=True)
+#mpf.plot(df_mpf, type='candle', mav=(3,6,9), volume=True)
