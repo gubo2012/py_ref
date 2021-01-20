@@ -19,18 +19,37 @@ import stock_ml
 import stock_fe
 import stock_bt
 
+import logging
 import json
 import pickle
 import sys
 import warnings
+from config_manager import ConfigManager
+
+
+conf_man = ConfigManager('./stock.yaml')
+
+
+
+logging.basicConfig(
+        format = '%(asctime)-15s %(message)s',
+        filename='grid_search.log',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 
 def run_grid_search(ticker, params):
-    up_down_threshold = 0.002 #0.2%
-    total_shifts = 10
+#    up_down_threshold = 0.002 #0.2%
+#    total_shifts = 10
+    up_down_threshold = conf_man['up_down_threshold']
+    total_shifts = conf_man['total_shifts']
+    
     
     use_stocks_all_data = 1
     
@@ -191,7 +210,10 @@ def run_grid_search(ticker, params):
 
 if __name__ == '__main__':
     
-    ticker = 'W'
+    
+    ticker = 'QQQ'
+    
+    logger.info(f'Ticker {ticker} starts')
     
     final_output = {}
     
@@ -201,13 +223,16 @@ if __name__ == '__main__':
     count = 0
     for key, value in params_all.items():
         print('#{} params: '.format(count), value)
-                
+              
         row_output = {'row':count}
         row_output.update(value)
         
         output_dict = run_grid_search(ticker, params=value)
         row_output.update(output_dict)
-                
+        
+        logger.info(f'Params #{count} done')
+                   
+        
         final_output[count]=row_output
         
         count += 1
@@ -219,3 +244,5 @@ if __name__ == '__main__':
     output = open(stock_io.grid_search_output.format(ticker), 'wb')
     pickle.dump(final_output, output)
     output.close()
+    
+    logger.info(f'Ticker {ticker} done')

@@ -22,7 +22,7 @@ import json
 import pickle
 from functools import reduce
 
-ticker = 'W'
+ticker = 'QQQ'
 
 pkl_file = open(stock_io.grid_search_output.format(ticker), 'rb')
 grid_search_results = pickle.load(pkl_file)
