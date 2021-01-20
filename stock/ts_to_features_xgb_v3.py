@@ -210,39 +210,43 @@ def run_grid_search(ticker, params):
 
 if __name__ == '__main__':
     
+
+    ticker_list = ['SPY', 'QQQ', 'BYND', 'W']    
+    for ticker in ticker_list:
     
-    ticker = 'QQQ'
-    
-    logger.info(f'Ticker {ticker} starts')
-    
-    final_output = {}
-    
-    with open(stock_io.grid_search) as json_file:
-        params_all = json.load(json_file)
         
-    count = 0
-    for key, value in params_all.items():
-        print('#{} params: '.format(count), value)
-              
-        row_output = {'row':count}
-        row_output.update(value)
+    #    ticker = 'QQQ'
         
-        output_dict = run_grid_search(ticker, params=value)
-        row_output.update(output_dict)
+        logger.info(f'Ticker {ticker} starts')
         
-        logger.info(f'Params #{count} done')
-                   
+        final_output = {}
         
-        final_output[count]=row_output
+        with open(stock_io.grid_search) as json_file:
+            params_all = json.load(json_file)
+            
+        count = 0
+        for key, value in params_all.items():
+            print('#{} params: '.format(count), value)
+                  
+            row_output = {'row':count}
+            row_output.update(value)
+            
+            output_dict = run_grid_search(ticker, params=value)
+            row_output.update(output_dict)
+            
+#            logger.info(f'Params #{count} done')
+                       
+            
+            final_output[count]=row_output
+            
+            count += 1
+            
         
-        count += 1
+    #    with open(stock_io.grid_search_output.format(ticker), "w") as outfile:
+    #        json.dump(final_output, outfile) 
         
-    
-#    with open(stock_io.grid_search_output.format(ticker), "w") as outfile:
-#        json.dump(final_output, outfile) 
-    
-    output = open(stock_io.grid_search_output.format(ticker), 'wb')
-    pickle.dump(final_output, output)
-    output.close()
-    
-    logger.info(f'Ticker {ticker} done')
+        output = open(stock_io.grid_search_output.format(ticker), 'wb')
+        pickle.dump(final_output, output)
+        output.close()
+        
+        logger.info(f'Ticker {ticker} done')

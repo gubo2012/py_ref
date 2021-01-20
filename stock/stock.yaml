@@ -1,3 +1,7 @@
 # general stock settings
 up_down_threshold: 0.002 #0.2%
 total_shifts: 10
+
+
+# output analysis
+emsemble_n: 9
