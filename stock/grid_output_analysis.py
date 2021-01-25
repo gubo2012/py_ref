@@ -108,7 +108,7 @@ def analyze_ticker(ticker):
 if __name__ == '__main__':
     
 
-    ticker_list = ['SPY', 'QQQ', 'BYND', 'W']    
+    ticker_list = ['SPY', 'QQQ', 'BYND', 'W', 'TSLA', 'NIO', 'FUBO', 'BIDU', 'ARKK']
     
     confident_outputs = []
     
