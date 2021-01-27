@@ -57,6 +57,7 @@ def run_grid_search(ticker, params):
     use_other_tickers = params['use_other_tickers']
     use_cdl_patt = params['use_cdl_patt']
     use_short_vol_flag = params['use_short_vol_flag']
+    use_options = 1
 
     ticker_list = params['ticker_list']
     if ticker in ticker_list:
@@ -106,6 +107,11 @@ def run_grid_search(ticker, params):
     df['HC_HL'] = (df['High'] - df['Close']) / (df['High'] - df['Low'])
     
     shift_only_cols = ['CO_HL', 'HC_HL']
+    
+    
+    # add options
+    if use_options:
+        df = stock_fe.add_options(df, ticker)
     
     
     # add candle patterns

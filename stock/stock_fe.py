@@ -89,6 +89,32 @@ def add_cdl(df, df_cdl, patt_list, lag):
 
     return df
         
+
+# add options        
+def add_options(df, ticker):
+    
+    df_options = pd.read_pickle('options_all.pkl')
+    df_options = df_options[df_options['symbol'] == ticker]
+    
+    cols_options = ['LTCallFlow', 'STCallFlow', 'LTPutFlow', 'STPutFlow']
+    
+    for col in cols_options:
+        df_options[col] = df_options[col].fillna(0)
+        df_options[col] = df_options[col] / df_options['Adj Close'] / df_options['Volume'] * 1000 * 1000
+    
+    df_options = df_options.drop(['symbol', 'CallFlow', 'PutFlow', 'Adj Close', 'Volume'], axis = 1)
         
+    
+    df_options = ts_to_features.mongodb_format(df_options)
+    
+    for col in cols_options:
+        df_options[col] = df_options[col].fillna(0)
+    
+    df_options = fe_pipeline(df_options, cols_options, scale_ma_flag=False, drop_col=True)
+    
+    df = pd.merge(df, df_options, how='left', on='date')
+    
+      
+    return df
     
     

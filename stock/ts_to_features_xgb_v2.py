@@ -34,6 +34,7 @@ use_stocks_all_data = 1
 
 use_pc_flag = 1
 use_other_tickers = 1
+
 #ticker_list = ['GLD', 'AGG']
 #ticker_list = ['GLD', 'AGG', 'SLV']
 #ticker_list = ['GLD', 'SLV']
@@ -42,6 +43,8 @@ use_btc_flag = 0
 use_cdl_patt = 1
 use_short_vol_flag = 1
 patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CDLHARAMI', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLLONGLEGGEDDOJI', 'CDLMARUBOZU', 'CDLRICKSHAWMAN', 'CDLSHORTLINE']
+
+use_options = 0
 
 print_features_flag = 0
 
@@ -162,6 +165,10 @@ if use_pc_flag:
 
 if use_other_tickers:
     df = stock_fe.add_other_tickers(df, ticker_list)
+
+if use_options:
+    df = stock_fe.add_options(df, ticker)
+
 #
 #if use_btc_flag:
 #    df = ts_to_features.add_btc(df)
@@ -177,7 +184,7 @@ if use_short_vol_flag:
 output_dict = {'Ticker':ticker}
 for i in range(3):
     n = i+1
-    day_outout_dict = stock_ml.nth_day_fcst(df, df_cdl, n, patt_list, test_date,
+    day_outout_dict = stock_ml.nth_day_fcst(df, df_cdl, n, patt_list, test_date, use_cdl_patt,
                                           print_features_flag=print_features_flag)
     output_dict.update(day_outout_dict)
 
