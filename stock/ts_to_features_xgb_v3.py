@@ -57,7 +57,7 @@ def run_grid_search(ticker, params):
     use_other_tickers = params['use_other_tickers']
     use_cdl_patt = params['use_cdl_patt']
     use_short_vol_flag = params['use_short_vol_flag']
-    use_options = 1
+    use_options = params['use_options_flag']
 
     ticker_list = params['ticker_list']
     if ticker in ticker_list:
@@ -78,7 +78,8 @@ def run_grid_search(ticker, params):
     df = ts_to_features.data_format(df)
     
     start_date = '2019-01-01'
-    test_date = '2020-08-01'
+#    start_date = '2020-03-01'
+    test_date = '2020-10-01'
     df = df[df.date >= start_date]
     
     df_close = df.copy()

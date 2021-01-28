@@ -56,6 +56,7 @@ def analyze_ticker(ticker):
     
     
     n = 3
+    conf_clf_threshold = 0.2
     df['overall_acc'] = 0
     df['overall_rmse'] = 0
     for i in range(n):
@@ -98,11 +99,23 @@ def analyze_ticker(ticker):
         col_reg = f'{i+1}d_reg_fcst'
         reg_fcst_num = float(final_output[col_reg][:-1])
         if final_output[col_clf] * reg_fcst_num > 0:
-            final_output_confident[col_clf] = final_output[col_clf]
-            final_output_confident[col_reg] = final_output[col_reg]
+            if final_output[col_clf] > conf_clf_threshold or final_output[col_clf] < -conf_clf_threshold:
+                final_output_confident[col_clf] = final_output[col_clf]
+                final_output_confident[col_reg] = final_output[col_reg]
         
-    print(final_output)
-    return final_output_confident
+    
+#    # print flags
+#    cols_flag = util.show_cols(df_top, 'use_')
+#    flags = {}
+#    for col in cols_flag:
+#        flags[col] = round(df_top[col].mean(), 2)
+#    print(ticker, flags)
+#    
+#    print(df_top['ticker_list'].mode())
+    
+    avg_acc = df_top['overall_acc'].mean()
+    print('Avg Acc:', avg_acc, final_output)
+    return final_output_confident, avg_acc
 
 
 if __name__ == '__main__':
@@ -111,11 +124,14 @@ if __name__ == '__main__':
     ticker_list = ['SPY', 'QQQ', 'BYND', 'W', 'TSLA', 'NIO', 'FUBO', 'BIDU', 'ARKK']
     
     confident_outputs = []
+    avg_acc_outputs = {}
     
     for ticker in ticker_list:
-        confident_output = analyze_ticker(ticker)
+        confident_output, avg_acc = analyze_ticker(ticker)
         if len(confident_output) > 1:
             confident_outputs.append(confident_output)
+        avg_acc_outputs[ticker] = '{}%'.format(round(avg_acc * 100, 1))
             
     print('Confident fcst only:', confident_outputs)
+    print('1-3-day fcst avg accuracy:', avg_acc_outputs)
         
