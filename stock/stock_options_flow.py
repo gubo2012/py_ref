@@ -12,8 +12,8 @@ import util
 
 
 trade_date = '2021-01-29'
-excl_expiry = '2021-01-29' # exclude expiry
-#excl_expiry = ''
+#excl_expiry = '2021-01-29' # exclude expiry
+excl_expiry = ''
 
 def get_options_stats(df, quantile=0.9):
     df = df[['Strike', 'NBBOBid', 'NBBOAsk', 'Size', 'Price', 'TradeIV', 'Flow']]

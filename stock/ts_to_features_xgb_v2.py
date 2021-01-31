@@ -44,7 +44,7 @@ use_cdl_patt = 1
 use_short_vol_flag = 1
 patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CDLHARAMI', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLLONGLEGGEDDOJI', 'CDLMARUBOZU', 'CDLRICKSHAWMAN', 'CDLSHORTLINE']
 
-use_options = 0
+use_options = 1
 
 print_features_flag = 0
 

@@ -94,6 +94,8 @@ def analyze_ticker(ticker):
             final_output[col] = '{}%'.format(round(fcst * 100, 1))
     
     # filter in only confident fcsts
+    df_conf_output = pd.DataFrame([{'ticker':ticker}])
+    
     for i in range(n):
         col_clf = f'{i+1}d_clf_fcst'
         col_reg = f'{i+1}d_reg_fcst'
@@ -102,6 +104,11 @@ def analyze_ticker(ticker):
             if final_output[col_clf] > conf_clf_threshold or final_output[col_clf] < -conf_clf_threshold:
                 final_output_confident[col_clf] = final_output[col_clf]
                 final_output_confident[col_reg] = final_output[col_reg]
+                df_conf_output[f'{i+1}d_fcst'] = float(final_output[col_reg][:-1]) # convert to float after remove %
+            else:
+                df_conf_output[f'{i+1}d_fcst'] = 0
+        else:
+            df_conf_output[f'{i+1}d_fcst'] = 0
         
     
 #    # print flags
@@ -115,7 +122,7 @@ def analyze_ticker(ticker):
     
     avg_acc = df_top['overall_acc'].mean()
     print('Avg Acc:', avg_acc, final_output)
-    return final_output_confident, avg_acc
+    return final_output_confident, avg_acc, df_conf_output
 
 
 if __name__ == '__main__':
@@ -126,12 +133,29 @@ if __name__ == '__main__':
     confident_outputs = []
     avg_acc_outputs = {}
     
+    
+    #output to df to visualize
+    summary_output_1st_flag = 1
+    
     for ticker in ticker_list:
-        confident_output, avg_acc = analyze_ticker(ticker)
+        confident_output, avg_acc, df_conf_output_row = analyze_ticker(ticker)
         if len(confident_output) > 1:
             confident_outputs.append(confident_output)
         avg_acc_outputs[ticker] = '{}%'.format(round(avg_acc * 100, 1))
+        
+        if summary_output_1st_flag:
+            df_conf_output = df_conf_output_row.copy()
+            summary_output_1st_flag = 0
+        else:
+            df_conf_output = df_conf_output.append(df_conf_output_row)
             
     print('Confident fcst only:', confident_outputs)
     print('1-3-day fcst avg accuracy:', avg_acc_outputs)
+    
+    n = 3
+    df_chart = df_conf_output.copy()
+    df_chart['day0'] = 1
+    for i in range(n):
+        df_chart['day{}'.format(i+1)] = df_chart['day{}'.format(i)] * (1 + df_chart['{}d_fcst'.format(i+1)] / 100)
+    
         
