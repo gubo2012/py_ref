@@ -11,6 +11,10 @@ import numpy as np
 import util
 
 
+trade_date = '2021-01-29'
+excl_expiry = '2021-01-29' # exclude expiry
+#excl_expiry = ''
+
 def get_options_stats(df, quantile=0.9):
     df = df[['Strike', 'NBBOBid', 'NBBOAsk', 'Size', 'Price', 'TradeIV', 'Flow']]
     df['AA'] = np.where(df['Price']>=df['NBBOAsk'], 1, 0)
@@ -23,36 +27,48 @@ def get_options_stats(df, quantile=0.9):
 
 
 def get_options_stats_dict(df, expiry, strike):
+    
+    stats_dict = {'Expiry':expiry, 'Strike':strike}
+    
     # call options
     slice_dict = {'Expiry':expiry, 'OptionType':'C', 'Strike':strike}
-    stats_dict = {'Expiry':expiry, 'Strike':strike}
     df2C = util.slice_df(df.copy(), slice_dict)
     
-    df2C, df2C_sum = get_options_stats(df2C)
+    if len(df2C) > 0:   
     
-    try:
-        call_bull_large_flow = df2C_sum.loc[(1, 1, 0), ('Flow', 'sum')] 
-    except:
-        call_bull_large_flow = 0
-    try:
-        call_bull_small_flow = df2C_sum.loc[(0, 1, 0), ('Flow', 'sum')] 
-    except:
-        call_bull_small_flow = 0
-    try:
-        call_bear_large_flow = df2C_sum.loc[(1, 0, 1), ('Flow', 'sum')] 
-    except:
-        call_bear_large_flow = 0
-    try:
-        call_bear_small_flow = df2C_sum.loc[(0, 0, 1), ('Flow', 'sum')] 
-    except:
-        call_bear_small_flow = 0
+        df2C, df2C_sum = get_options_stats(df2C)
+        
+        try:
+            call_bull_large_flow = df2C_sum.loc[(1, 1, 0), ('Flow', 'sum')] 
+        except:
+            call_bull_large_flow = 0
+        try:
+            call_bull_small_flow = df2C_sum.loc[(0, 1, 0), ('Flow', 'sum')] 
+        except:
+            call_bull_small_flow = 0
+        try:
+            call_bear_large_flow = df2C_sum.loc[(1, 0, 1), ('Flow', 'sum')] 
+        except:
+            call_bear_large_flow = 0
+        try:
+            call_bear_small_flow = df2C_sum.loc[(0, 0, 1), ('Flow', 'sum')] 
+        except:
+            call_bear_small_flow = 0
+    
+        stats_dict['call_bull_large_flow'] = round(call_bull_large_flow, 2)
+        stats_dict['call_bull_small_flow'] = round(call_bull_small_flow, 2)
+        stats_dict['call_bear_large_flow'] = round(call_bear_large_flow, 2)
+        stats_dict['call_bear_small_flow'] = round(call_bear_small_flow, 2)
+        
+        stats_dict['call_flow_sum'] = round(df2C['Flow'].sum(), 2)
+    else:
+        stats_dict['call_bull_large_flow'] = 0
+        stats_dict['call_bull_small_flow'] = 0
+        stats_dict['call_bear_large_flow'] = 0
+        stats_dict['call_bear_small_flow'] = 0       
 
-    stats_dict['call_bull_large_flow'] = round(call_bull_large_flow, 2)
-    stats_dict['call_bull_small_flow'] = round(call_bull_small_flow, 2)
-    stats_dict['call_bear_large_flow'] = round(call_bear_large_flow, 2)
-    stats_dict['call_bear_small_flow'] = round(call_bear_small_flow, 2)
-    
-    stats_dict['call_flow_sum'] = round(df2C['Flow'].sum(), 2)
+        stats_dict['call_flow_sum'] = 0
+
 
     # put options
     slice_dict = {'Expiry': expiry, 'OptionType':'P', 'Strike':strike}
@@ -97,7 +113,7 @@ def get_options_stats_dict(df, expiry, strike):
     return stats_dict
     
 
-ticker = 'W'
+ticker = 'GME'
 
 sof_file = '{}_options_flow.pkl'.format(ticker)
 
@@ -106,7 +122,11 @@ df_raw = pd.read_pickle(sof_file)
 
 # a slice of df
 df = df_raw.copy()
-df = df[df['Date'] == '2021-01-13']
+df = df[df['Date'] == trade_date]
+
+# exclude a certain expiry date
+if excl_expiry != '':
+    df = df[df['Expiry'] != excl_expiry]
 
 
 #df_sum = df.groupby(['Expiry', 'OptionType']).agg({'Size': ['count', 'mean'], 'Strike': ['mean']})
@@ -150,15 +170,16 @@ df_sort = df_sort.reset_index()
 #stats_dict['put_bull_large_flow_pct'] = put_bull_large_flow_pct
 #stats_dict['put_bull_small_flow_pct'] = put_bull_small_flow_pct
 
-expiry = '2021-01-15'
-strike = 300
+#expiry = '2021-02-05'
+#strike = 300
+#
+##expiry = '2023-01-20'
+##strike = 450
+#
+#stats_dict = get_options_stats_dict(df.copy(), expiry, strike)
 
-#expiry = '2023-01-20'
-#strike = 450
+print('Ticker {} trade_date {} most traded options by size:'.format(ticker, trade_date))
 
-stats_dict = get_options_stats_dict(df.copy(), expiry, strike)
-
-print('Ticker {} date {} most traded options by size:'.format(ticker, '2021-01-13'))
 
 for i in range(10):
     expiry = df_sort.at[df_sort.index[i], 'Expiry']
@@ -166,3 +187,16 @@ for i in range(10):
     stats_dict = get_options_stats_dict(df.copy(), expiry, strike)
     print('#{}: '.format(i+1))
     print(stats_dict)
+    
+    
+    df_row = pd.DataFrame([stats_dict])
+    df_row['rank'] = i + 1
+    if i == 0:
+        df_stats_output = df_row.copy()
+    else:
+        df_stats_output = df_stats_output.append(df_row)
+            
+df_stats_output['call_put_flow_ratio'] = df_stats_output['call_flow_sum'] / df_stats_output['put_flow_sum'] 
+df_stats_output['bull_total'] = df_stats_output['call_bull_large_flow'] + df_stats_output['call_bull_small_flow'] + df_stats_output['put_bull_large_flow'] + df_stats_output['put_bull_small_flow']
+df_stats_output['bear_total'] = df_stats_output['call_bear_large_flow'] + df_stats_output['call_bear_small_flow'] + df_stats_output['put_bear_large_flow'] + df_stats_output['put_bear_small_flow']
+df_stats_output['bull_bear_flow_ratio'] = df_stats_output['bull_total'] / df_stats_output['bear_total'] 
