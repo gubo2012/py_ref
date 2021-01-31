@@ -128,7 +128,8 @@ def analyze_ticker(ticker):
 if __name__ == '__main__':
     
 
-    ticker_list = ['SPY', 'QQQ', 'BYND', 'W', 'TSLA', 'NIO', 'FUBO', 'BIDU', 'ARKK', 'MSFT', 'AMD', 'NVDA', 'AAL']
+    ticker_list = ['SPY', 'QQQ', 'BYND', 'W', 'TSLA', 'NIO', 'FUBO', 'BIDU', 'ARKK', 'MSFT', 'AMD', 'NVDA', 'AAL', 'GME', 'SLV', 'AMC',
+                   'NOK', 'BA', 'BABA']
     
     confident_outputs = []
     avg_acc_outputs = {}

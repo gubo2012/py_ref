@@ -11,9 +11,10 @@ import numpy as np
 import util
 
 
+ticker = 'GME'
 trade_date = '2021-01-29'
-#excl_expiry = '2021-01-29' # exclude expiry
-excl_expiry = ''
+excl_expiry = '2021-01-29' # exclude expiry
+#excl_expiry = ''
 
 def get_options_stats(df, quantile=0.9):
     df = df[['Strike', 'NBBOBid', 'NBBOAsk', 'Size', 'Price', 'TradeIV', 'Flow']]
@@ -113,7 +114,7 @@ def get_options_stats_dict(df, expiry, strike):
     return stats_dict
     
 
-ticker = 'GME'
+
 
 sof_file = '{}_options_flow.pkl'.format(ticker)
 

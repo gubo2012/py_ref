@@ -32,7 +32,7 @@ from config_manager import ConfigManager
 conf_man = ConfigManager('./stock.yaml')
 
 
-ticker = 'W'
+ticker = 'NOK'
 print_features_flag = 1
 n_day_fcst = 1
 

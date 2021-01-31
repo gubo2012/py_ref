@@ -218,8 +218,9 @@ def run_grid_search(ticker, params):
 if __name__ == '__main__':
     
 
-    ticker_list = ['SPY', 'QQQ', 'BYND', 'W', 'TSLA', 'NIO', 'FUBO', 'BIDU', 'ARKK', 'MSFT', 'AMD', 'NVDA', 'AAL']
-#    ticker_list = ['SPY']
+#    ticker_list = ['SPY', 'QQQ', 'BYND', 'W', 'TSLA', 'NIO', 'FUBO', 'BIDU', 'ARKK', 'MSFT', 'AMD', 'NVDA', 'AAL']
+#    ticker_list = ['GME', 'SLV', 'AMC']
+    ticker_list = ['NOK', 'BA', 'BABA']
     for ticker in ticker_list:
     
         
