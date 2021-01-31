@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+for one-time train/score/debug
 Created on Fri Jan  1 12:58:04 2021
 
 @author: GuBo
@@ -19,16 +20,30 @@ import stock_ml
 import stock_fe
 import stock_bt
 
+
 import sys
 import warnings
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-ticker = 'BYND'
-up_down_threshold = 0.002 #0.2%
+
+from config_manager import ConfigManager
+conf_man = ConfigManager('./stock.yaml')
+
+
+ticker = 'W'
+print_features_flag = 1
 n_day_fcst = 1
-total_shifts = 10
+
+
+
+# load default settings
+up_down_threshold = conf_man['up_down_threshold']
+total_shifts = conf_man['total_shifts']
+#up_down_threshold = 0.002 #0.2%
+#total_shifts = 10
+
 
 use_stocks_all_data = 1
 
@@ -46,7 +61,6 @@ patt_list = ['CDLBELTHOLD', 'CDLCLOSINGMARUBOZU', 'CDLDOJI', 'CDLENGULFING', 'CD
 
 use_options = 1
 
-print_features_flag = 0
 
 if use_stocks_all_data:
     df = pd.read_pickle(stock_io.stocks_all_data)
@@ -58,8 +72,8 @@ else:
 
 df = ts_to_features.data_format(df)
 
-start_date = '2019-01-01'
-test_date = '2020-08-01'
+start_date = conf_man['train_start_date']
+test_date = conf_man['test_start_date']
 df = df[df.date >= start_date]
 
 df_close = df.copy()

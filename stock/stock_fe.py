@@ -10,6 +10,9 @@ import numpy as np
 
 import ts_to_features
 
+import util
+import stock_io
+
 def fe_pipeline(df, cols, total_shifts=10, mas=[20], scale_ma_flag=True, drop_col=False):
     
     if scale_ma_flag:
@@ -22,7 +25,7 @@ def fe_pipeline(df, cols, total_shifts=10, mas=[20], scale_ma_flag=True, drop_co
     df = ts_to_features.add_multi_shifts(df, shift_cols, total_shifts)
     
     # add fake-date for forecasting
-    df = ts_to_features.clone_last_row(df, shift_cols, days = 2)
+    df = ts_to_features.clone_last_row(df, shift_cols, days = 3)
     
     if drop_col:
         df = df.drop(cols, axis=1)
@@ -63,7 +66,7 @@ def add_pc_ratio(file_name, col_name):
 # process other tickers in ticker_list
 def add_other_tickers(df, ticker_list):
     
-    df_tickers = pd.read_pickle('tickers.pkl')
+    df_tickers = pd.read_pickle(stock_io.ref_data)
     df_tickers = ts_to_features.mongodb_format(df_tickers)
     
     for ticker in ticker_list:
@@ -93,7 +96,7 @@ def add_cdl(df, df_cdl, patt_list, lag):
 # add options        
 def add_options(df, ticker):
     
-    df_options = pd.read_pickle('options_all.pkl')
+    df_options = pd.read_pickle(stock_io.options_all_data)
     df_options = df_options[df_options['symbol'] == ticker]
     
     cols_options = ['LTCallFlow', 'STCallFlow', 'LTPutFlow', 'STPutFlow']
@@ -113,6 +116,10 @@ def add_options(df, ticker):
     df_options = fe_pipeline(df_options, cols_options, scale_ma_flag=False, drop_col=True)
     
     df = pd.merge(df, df_options, how='left', on='date')
+    
+    odf_cols = util.show_cols(df, 'Flow_')
+    for col in odf_cols:
+        df[col] = df[col].fillna(0)
     
       
     return df

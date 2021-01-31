@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+for batch-mode train/score
 Created on Fri Jan  1 12:58:04 2021
 
 @author: GuBo
@@ -77,9 +78,8 @@ def run_grid_search(ticker, params):
     
     df = ts_to_features.data_format(df)
     
-    start_date = '2019-01-01'
-#    start_date = '2020-03-01'
-    test_date = '2020-10-01'
+    start_date = conf_man['train_start_date']
+    test_date = conf_man['test_start_date']
     df = df[df.date >= start_date]
     
     df_close = df.copy()
@@ -219,6 +219,7 @@ if __name__ == '__main__':
     
 
     ticker_list = ['SPY', 'QQQ', 'BYND', 'W', 'TSLA', 'NIO', 'FUBO', 'BIDU', 'ARKK', 'MSFT', 'AMD', 'NVDA', 'AAL']
+#    ticker_list = ['SPY']
     for ticker in ticker_list:
     
         
