@@ -1,0 +1,7 @@
+In Machine Learning 101, we will discuss:
+
+ - The difference between traditional statistical models and contemporary machine learning methods
+ - The bias variance tradeoff, and identifying loss functions for predictive models
+ - Different types of machine learning models, such as random forests and boosting
+ - Provide an example code walkthrough for comparing random forests to logistic regression in python
+

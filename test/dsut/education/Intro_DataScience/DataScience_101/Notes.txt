@@ -1,0 +1,46 @@
+1 hour, ~20 slides
+
+ - intro to using python for data science
+ - todo: get generic dataset that we use for interviews
+ - jupyter notebook
+
+
+Data taken from https://health.data.ny.gov/Health/Behavioral-Risk-Factor-Surveillance-Survey-2015/rcr8-b3jj
+
+  - many health related datasets to browse at https://healthdata.ny.gov/
+
+Outline:
+
+ - Introduction
+  - team members, give my background
+
+ - What is data science?
+   - using data to make better decisions
+   - what it is not: artificial intelligence
+
+ - Example today, using python
+
+ - load in CSV file (can do SQL)
+ - display dataset
+ - make a graph (scatterplot/linegraph) 
+   - boxplot per age group 
+ - estimate regression (put in data, get out predictions)
+ - apply those predictions to new data
+
+ - python general notes
+   - conda
+   - jupyter notebook
+
+ - future topics:
+   - machine learning 101
+   - data visualization 101
+   - forecasting 101
+
+
+######################################
+#barplot of age counts
+
+age_counts = brfss_dat['AgeMid'].value_counts()
+age_counts.sort_values(0,inplace=True)
+age_counts.plot.bar()
+######################################
