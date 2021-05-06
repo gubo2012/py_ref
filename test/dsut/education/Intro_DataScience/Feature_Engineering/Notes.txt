@@ -1,3 +1,0 @@
-Course Title: Feature Engineering
-
-Description: This Data Science & Machine Learning 101 course will cover Feature Engineering. Feature engineering entails different ways to prepare your data, often using business domain knowledge, so machine learning algorithms can uncover complicated relationships between different variables.
